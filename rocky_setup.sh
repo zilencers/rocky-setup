@@ -7,7 +7,7 @@ packages[wpa_supplicant]='-y'
 packages[dkms]='--enablerepo="epel"'
 packages[hostapd]='-y'
 packages[snapd]='-y'
-packages[vim-X11]='-y'
+packages[vim]='-y'
 packages[kernel-devel]='-y'
 packages[zfs]='-y'
 
@@ -24,12 +24,9 @@ gpg --import --import-options show-only /etc/pki/rpm-gpg/RPM-GPG-KEY-zfsonlinux
 dnf -y upgrade
 
 # Install Packages
-echo "Installing Packages..."
-
-for key in "${!packages[@]}"; do  
-    if [ ! $(dnf list installed | grep -i $key) ] ; then
-        dnf $key install ${packages[$key]}
-    fi
+for key in "${!packages[@]}"; do
+    echo "Installing Package: " $key
+    dnf ${packages[$key]} install $key 
 done
 
 # Enable SNAPD
