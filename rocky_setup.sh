@@ -2,21 +2,19 @@
 
 declare -A packages
 packages[git]='-y'
+packages[podman]='-y'
 packages[cockpit]='-y'
+packages[cockpit-podman]='-y'
 packages[wpa_supplicant]='-y'
-packages[dkms]='--enablerepo="epel"'
 packages[hostapd]='-y'
-packages[snapd]='-y'
 packages[nano]='-y'
-packages[kernel-devel]='-y'
-packages[zfs]='-y'
-
+packages[dkms]='--enablerepo="epel"'
 
 # Updating the system
 echo "Running system upgrade..."
 
 if [ ! -f UPGRADE ]; then
-    dnf -y upgrade
+    sudo dnf -y upgrade
     touch UPGRADE
 
     echo ""
@@ -27,38 +25,30 @@ if [ ! -f UPGRADE ]; then
     read choice
 
     if [ $choice == 'y' ]; then
-        reboot
+        sudo reboot
     fi
 fi
 
 # Add Repositories
 echo "Adding EPEL Repository..."
-dnf -y install epel-release
-
-#echo "Adding ZFS Repository..."
-dnf -y install https://zfsonlinux.org/epel/zfs-release-2-2$(rpm --eval "%{dist}").noarch.rpm
-gpg --import --import-options show-only /etc/pki/rpm-gpg/RPM-GPG-KEY-zfsonlinux
+sudo dnf -y install epel-release
 
 # Install Packages
 for key in "${!packages[@]}"; do
     echo "Installing Package: " $key
-    dnf ${packages[$key]} install $key 
+    sudo dnf ${packages[$key]} install $key 
 done
 
-# Enable SNAPD
-systemctl enable snapd
+# Enable Cockpit
+sudo systemctl enable --now cockpit.socket
 
-# Start SNAPD
-systemctl start snapd
-
-# Install LXD
-echo "Installing LXD..."
-snap install lxd
+# Start Podman user service
+systemctl start --user podman
 
 # Install Wireless Drivers
 echo "Installing Rtl88x2bu wireless drivers"
 git clone "https://github.com/RinCat/RTL88x2BU-Linux-Driver.git" /usr/src/rtl88x2bu-git
 sed -i 's/PACKAGE_VERSION="@PKGVER@"/PACKAGE_VERSION="git"/g' /usr/src/rtl88x2bu-git/dkms.conf
-dkms add -m rtl88x2bu -v git
-dkms autoinstall
+sudo dkms add -m rtl88x2bu -v git
+sudo dkms autoinstall
 
