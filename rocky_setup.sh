@@ -7,10 +7,26 @@ packages[wpa_supplicant]='-y'
 packages[dkms]='--enablerepo="epel"'
 packages[hostapd]='-y'
 packages[snapd]='-y'
-packages[vim]='-y'
+packages[nano]='-y'
 packages[kernel-devel]='-y'
 packages[zfs]='-y'
 
+
+# Updating the system
+echo "Running system upgrade..."
+
+dnf -y upgrade
+
+echo ""
+echo "--------------- Upgrade Complete ------------------"
+echo "A reboot is recommended. You can re-run this script"
+echo "after the reboot is complete."
+printf "Reboot now? (y/N) "
+read choice
+
+if [ $choice == 'y' ]; then
+    reboot
+fi
 
 # Add Repositories
 echo "Adding EPEL Repository..."
@@ -19,9 +35,6 @@ dnf -y install epel-release
 echo "Adding ZFS Repository..."
 dnf -y install https://zfsonlinux.org/epel/zfs-release-2-2$(rpm --eval "%{dist}").noarch.rpm
 gpg --import --import-options show-only /etc/pki/rpm-gpg/RPM-GPG-KEY-zfsonlinux
-
-# Updating the system
-dnf -y upgrade
 
 # Install Packages
 for key in "${!packages[@]}"; do
