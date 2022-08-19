@@ -15,24 +15,27 @@ packages[zfs]='-y'
 # Updating the system
 echo "Running system upgrade..."
 
-dnf -y upgrade
+if [ ! -f UPGRADE ]; then
+    dnf -y upgrade
+    touch UPGRADE
 
-echo ""
-echo "--------------- Upgrade Complete ------------------"
-echo "A reboot is recommended. You can re-run this script"
-echo "after the reboot is complete."
-printf "Reboot now? (y/N) "
-read choice
+    echo ""
+    echo "--------------- Upgrade Complete ------------------"
+    echo "A reboot is recommended. You can re-run this script"
+    echo "after the reboot is complete."
+    printf "Reboot now? (y/N) "
+    read choice
 
-if [ $choice == 'y' ]; then
-    reboot
+    if [ $choice == 'y' ]; then
+        reboot
+    fi
 fi
 
 # Add Repositories
 echo "Adding EPEL Repository..."
 dnf -y install epel-release
 
-echo "Adding ZFS Repository..."
+#echo "Adding ZFS Repository..."
 dnf -y install https://zfsonlinux.org/epel/zfs-release-2-2$(rpm --eval "%{dist}").noarch.rpm
 gpg --import --import-options show-only /etc/pki/rpm-gpg/RPM-GPG-KEY-zfsonlinux
 
